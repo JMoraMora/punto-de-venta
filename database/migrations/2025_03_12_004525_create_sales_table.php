@@ -18,7 +18,15 @@ return new class extends Migration
             $table->string('customer');
             $table->string('document');
             $table->string('email')->unique()->nullable();
-            $table->unsignedInteger('user_id');
+
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+
+            $table->unsignedBigInteger('product_id');
+            $table->foreign('product_id')->references('id')->on('products');
+
+            $table->unsignedInteger('quantity');
+
             $table->decimal('total', 10, 2);
 
             $table->timestamps();
