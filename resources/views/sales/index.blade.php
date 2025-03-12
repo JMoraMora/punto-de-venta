@@ -15,6 +15,7 @@
         <thead>
             <tr>
                 <th>ID</th>
+                <th>Codigo</th>
                 <th>Cliente</th>
                 <th>Producto</th>
                 <th>Cantidad</th>
@@ -29,6 +30,7 @@
             @foreach($sales as $sale)
                 <tr>
                     <td>{{ $sale->id }}</td>
+                    <td>{{ $sale->code }}</td>
                     <td>{{ $sale->customer }}</td>
                     <td>{{ $sale->product->name }}</td>
                     <td>{{ $sale->quantity }}</td>
