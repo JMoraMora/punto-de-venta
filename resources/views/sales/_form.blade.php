@@ -1,6 +1,11 @@
 <!-- filepath: /var/www/punto-de-venta/resources/views/sales/form.blade.php -->
 
 <div class="form-group">
+    <label for="code">Codigo de venta</label>
+    <input type="text" name="code" class="form-control" id="code" value="{{ old('code', $sale->code ?? '') }}" required>
+</div>
+
+<div class="form-group">
     <label for="customer">Cliente</label>
     <input type="text" name="customer" class="form-control" id="customer" value="{{ old('customer', $sale->customer ?? '') }}" required>
 </div>
@@ -8,6 +13,11 @@
 <div class="form-group">
     <label for="document">Nro Documento</label>
     <input type="text" name="document" class="form-control" id="document" value="{{ old('document', $sale->document ?? '') }}" required>
+</div>
+
+<div class="form-group">
+    <label for="email">Email</label>
+    <input type="text" name="email" class="form-control" id="email" value="{{ old('email', $sale->email ?? '') }}">
 </div>
 
 <div class="form-group">
