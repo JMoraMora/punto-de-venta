@@ -79,12 +79,45 @@ class SaleController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'product_name' => 'required|string|max:255',
+            'code' => 'required|string|max:255',
+            'customer' => 'required|string|max:255',
+            'document' => 'required|string|max:255',
+            'product_id' => 'required|string|max:255',
             'quantity' => 'required|integer',
-            'price' => 'required|numeric',
         ]);
 
-        Sale::whereId($id)->update($validatedData);
+        $sale = Sale::findOrFail($id);
+        $product = Product::findOrFail($validatedData['product_id']);
+
+        if ($product->stock_available + $sale->quantity < $validatedData['quantity']) {
+            return redirect()->route('sales.edit', $id)->with('error', 'No hay suficiente stock disponible.');
+        }
+
+        // Revertir el stock del producto anterior
+        $product->stock_available += $sale->quantity;
+        $product->save();
+
+        // Actualizar el stock del nuevo producto
+        $product->stock_available -= $validatedData['quantity'];
+        $product->save();
+
+        $sale->code = $validatedData['code'];
+        $sale->customer = $validatedData['customer'];
+        $sale->document = $validatedData['document'];
+
+        if($request->has('email') && !empty($request->email)) {
+            $request->validate([
+                'email' => 'email',
+            ]);
+
+            $sale->email = $request->email;
+        }
+
+        $sale->product_id = $product->id;
+        $sale->quantity = $validatedData['quantity'];
+        $sale->total = $product->price * $validatedData['quantity'];
+
+        $sale->save();
 
         return redirect()->route('sales.index')->with('success', 'Venta actualizada exitosamente.');
     }

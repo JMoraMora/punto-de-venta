@@ -5,12 +5,15 @@
 @section('content')
 <div class="container">
     <h1 class="my-4">Lista de Ventas</h1>
+
     <a href="{{ route('sales.create') }}" class="btn btn-primary mb-3">Crear Nueva Venta</a>
+
     @if(session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
         </div>
     @endif
+
     <table class="table table-bordered">
         <thead>
             <tr>

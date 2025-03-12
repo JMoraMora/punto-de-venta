@@ -5,6 +5,13 @@
 @section('content')
 <div class="container">
     <h1>Crear Nueva Venta</h1>
+
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <form action="{{ route('sales.store') }}" method="POST">
         @csrf
         @include('sales._form')
