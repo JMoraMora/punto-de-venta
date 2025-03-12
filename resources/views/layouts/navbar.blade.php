@@ -16,6 +16,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('sales.index') }}">Ventas</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('reports.sales') }}">Reportes</a>
+                </li>
             </ul>
 
             <div class="dropdown">

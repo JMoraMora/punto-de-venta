@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SaleController;
 use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,6 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-
     Route::middleware(EnsureUserHasRole::class . ':administrator')->group(function () {
         Route::controller(ProductController::class)->group(function () {
             Route::get('/products', 'index')->name('products.index');
@@ -33,7 +33,7 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    Route::middleware(EnsureUserHasRole::class.':seller,administrator')->group(function () {
+    Route::middleware(EnsureUserHasRole::class . ':seller,administrator')->group(function () {
         Route::controller(SaleController::class)->group(function () {
             Route::get('/sales', 'index')->name('sales.index');
             Route::get('/sales/create', 'create')->name('sales.create');
@@ -44,6 +44,10 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
+    Route::middleware(EnsureUserHasRole::class . ':administrator')->group(function () {
+        Route::get('/reports/sales', [ReportController::class, 'index'])->name('reports.sales');
+        Route::get('/reports/sales/export', [ReportController::class, 'export'])->name('reports.sales.export');
+    });
 });
 
 require __DIR__.'/auth.php';
