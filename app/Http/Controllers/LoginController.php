@@ -21,7 +21,12 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            return redirect()->intended('dashboard');
+            $user = Auth::user();
+            if ($user->role === 'administrator') {
+                return redirect()->route('sales.index');
+            } elseif ($user->role === 'seller') {
+                return redirect()->route('sales.create');
+            }
         }
 
         return back()->withErrors([

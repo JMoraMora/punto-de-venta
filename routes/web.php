@@ -8,16 +8,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect()->route('dashboard');
+        $user = Auth::user();
+        if ($user->role === 'administrator') {
+            return redirect()->route('sales.index');
+        } elseif ($user->role === 'seller') {
+            return redirect()->route('sales.create');
+        }
     }
 
     return redirect()->route('login');
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->middleware(['auth'])->name('dashboard');
 
     Route::middleware(EnsureUserHasRole::class . ':administrator')->group(function () {
         Route::controller(ProductController::class)->group(function () {
