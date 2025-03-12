@@ -21,6 +21,7 @@
                 <th>Precio unitario</th>
                 <th>Total</th>
                 <th>Fecha</th>
+                <th>Vendedor</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -34,6 +35,7 @@
                     <td>{{ $sale->product->price }}</td>
                     <td>{{ $sale->total }}</td>
                     <td>{{ $sale->created_at }}</td>
+                    <td>{{ $sale->user->name }}</td>
                     <td>
                         <a href="{{ route('sales.edit', $sale->id) }}" class="btn btn-warning">Editar</a>
                         <form action="{{ route('sales.destroy', $sale->id) }}" method="POST" style="display:inline-block;">
