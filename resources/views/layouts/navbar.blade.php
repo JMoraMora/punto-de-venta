@@ -16,9 +16,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('sales.index') }}">Ventas</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('reports.sales') }}">Reportes</a>
-                </li>
+                @if(Auth::user()->role === 'administrator')
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('reports.sales') }}">Reportes</a>
+                    </li>
+                @endif
             </ul>
 
             <div class="dropdown">
