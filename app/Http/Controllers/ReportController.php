@@ -35,9 +35,9 @@ class ReportController extends Controller
 
         if ($format === 'json') {
             return response()->json($sales);
+        } else {
+            $delimiter = '|';
         }
-
-        $delimiter = $format === 'csv' ? ',' : '|';
 
         $response = new StreamedResponse(function() use ($sales, $delimiter) {
             $handle = fopen('php://output', 'w');
