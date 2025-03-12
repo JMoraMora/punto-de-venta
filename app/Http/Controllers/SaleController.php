@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Sale;
+use Illuminate\Support\Facades\Auth;
 
 class SaleController extends Controller
 {
@@ -26,12 +27,42 @@ class SaleController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'product_name' => 'required|string|max:255',
+            'code' => 'required|string|max:255',
+            'customer' => 'required|string|max:255',
+            'document' => 'required|string|max:255',
+            'product_id' => 'required|string|max:255',
             'quantity' => 'required|integer',
-            'price' => 'required|numeric',
         ]);
 
-        Sale::create($validatedData);
+        $product = Product::findOrFail($validatedData['product_id']);
+
+        if ($product->stock_available < $validatedData['quantity']) {
+            return redirect()->route('sales.create')->with('error', 'No hay suficiente stock disponible.');
+        }
+
+        $product->stock_available -= $validatedData['quantity'];
+        $product->save();
+
+        $sale = new Sale();
+        $sale->code = $validatedData['code'];
+        $sale->customer = $validatedData['customer'];
+        $sale->document = $validatedData['document'];
+
+        if($request->has('email') && !empty($request->email)) {
+            $request->validate([
+                'email' => 'email',
+            ]);
+
+            $sale->email = $request->email;
+        }
+
+        // $sale->user_id = Auth::id();
+        $sale->user_id = 1;
+        $sale->product_id = $product->id;
+        $sale->quantity = $validatedData['quantity'];
+        $sale->total = $product->price * $validatedData['quantity'];
+
+        $sale->save();
 
         return redirect()->route('sales.index')->with('success', 'Venta creada exitosamente.');
     }
