@@ -6,13 +6,15 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Sale;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class SaleController extends Controller
 {
     // Mostrar una lista de ventas
     public function index()
     {
-        $sales = Sale::paginate(12);
+        $sales = Sale::orderBy('id', 'desc')->paginate(12);
         return view('sales.index', compact('sales'));
     }
 
@@ -26,45 +28,56 @@ class SaleController extends Controller
     // Almacenar una nueva venta en la base de datos
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'code' => 'required|string|max:255',
-            'customer' => 'required|string|max:255',
-            'document' => 'required|string|max:255',
-            'product_id' => 'required|string|max:255',
-            'quantity' => 'required|integer',
-        ]);
+        DB::beginTransaction();
 
-        $product = Product::findOrFail($validatedData['product_id']);
-
-        if ($product->stock_available < $validatedData['quantity']) {
-            return redirect()->route('sales.create')->with('error', 'No hay suficiente stock disponible.');
-        }
-
-        $product->stock_available -= $validatedData['quantity'];
-        $product->save();
-
-        $sale = new Sale();
-        $sale->code = $validatedData['code'];
-        $sale->customer = $validatedData['customer'];
-        $sale->document = $validatedData['document'];
-
-        if($request->has('email') && !empty($request->email)) {
-            $request->validate([
-                'email' => 'email',
+        try {
+            $validatedData = $request->validate([
+                'code' => 'required|string|max:255|unique:sales,code',
+                'customer' => 'required|string|max:255',
+                'document' => 'required|string|max:255',
+                'product_id' => 'required|string|max:255',
+                'quantity' => 'required|integer',
             ]);
 
-            $sale->email = $request->email;
+            $product = Product::findOrFail($validatedData['product_id']);
+
+            if ($product->stock_available < $validatedData['quantity']) {
+                throw ValidationException::withMessages(['quantity' => 'No hay suficiente stock disponible.']);
+            }
+
+            $product->stock_available -= $validatedData['quantity'];
+            $product->save();
+
+            $sale = new Sale();
+            $sale->code = $validatedData['code'];
+            $sale->customer = $validatedData['customer'];
+            $sale->document = $validatedData['document'];
+
+            if ($request->has('email') && !empty($request->email)) {
+                $request->validate([
+                    'email' => 'email',
+                ]);
+
+                $sale->email = $request->email;
+            }
+
+            $sale->user_id = Auth::id();
+            $sale->product_id = $product->id;
+            $sale->quantity = $validatedData['quantity'];
+            $sale->total = $product->price * $validatedData['quantity'];
+
+            $sale->save();
+
+            DB::commit();
+
+            return redirect()->route('sales.index')->with('success', 'Venta creada exitosamente.');
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return redirect()->route('sales.create')->withErrors($e->errors());
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('sales.create')->with('error', 'Ocurrió un error al crear la venta.');
         }
-
-        // $sale->user_id = Auth::id();
-        $sale->user_id = 1;
-        $sale->product_id = $product->id;
-        $sale->quantity = $validatedData['quantity'];
-        $sale->total = $product->price * $validatedData['quantity'];
-
-        $sale->save();
-
-        return redirect()->route('sales.index')->with('success', 'Venta creada exitosamente.');
     }
 
     // Mostrar el formulario para editar una venta existente
@@ -75,57 +88,68 @@ class SaleController extends Controller
         return view('sales.edit', compact('sale', 'products'));
     }
 
-    // Actualizar una venta existente en la base de datos
     public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'code' => 'required|string|max:255',
-            'customer' => 'required|string|max:255',
-            'document' => 'required|string|max:255',
-            'product_id' => 'required|string|max:255',
-            'quantity' => 'required|integer',
-        ]);
+        DB::beginTransaction();
 
-        $sale = Sale::findOrFail($id);
-        $product = Product::findOrFail($validatedData['product_id']);
-
-        if ($product->stock_available + $sale->quantity < $validatedData['quantity']) {
-            return redirect()->route('sales.edit', $id)->with('error', 'No hay suficiente stock disponible.');
-        }
-
-        // Revertir el stock del producto anterior
-        $product->stock_available += $sale->quantity;
-        $product->save();
-
-        // Actualizar el stock del nuevo producto
-        $product->stock_available -= $validatedData['quantity'];
-        $product->save();
-
-        $sale->code = $validatedData['code'];
-        $sale->customer = $validatedData['customer'];
-        $sale->document = $validatedData['document'];
-
-        if($request->has('email') && !empty($request->email)) {
-            $request->validate([
-                'email' => 'email',
+        try {
+            $validatedData = $request->validate([
+                'code' => 'required|string|max:255|unique:sales,code,' . $id,
+                'customer' => 'required|string|max:255',
+                'document' => 'required|string|max:255',
+                'product_id' => 'required|string|max:255',
+                'quantity' => 'required|integer',
             ]);
 
-            $sale->email = $request->email;
+            $sale = Sale::findOrFail($id);
+            $product = Product::findOrFail($validatedData['product_id']);
+
+            if ($product->stock_available + $sale->quantity < $validatedData['quantity']) {
+                throw ValidationException::withMessages(['quantity' => 'No hay suficiente stock disponible.']);
+            }
+
+            $product->stock_available += $sale->quantity;
+            $product->stock_available -= $validatedData['quantity'];
+            $product->save();
+
+            $sale->code = $validatedData['code'];
+            $sale->customer = $validatedData['customer'];
+            $sale->document = $validatedData['document'];
+
+            if ($request->has('email') && !empty($request->email)) {
+                $request->validate([
+                    'email' => 'email',
+                ]);
+
+                $sale->email = $request->email;
+            }
+
+            $sale->user_id = Auth::id();
+            $sale->product_id = $product->id;
+            $sale->quantity = $validatedData['quantity'];
+            $sale->total = $product->price * $validatedData['quantity'];
+
+            $sale->save();
+
+            DB::commit();
+
+            return redirect()->route('sales.index')->with('success', 'Venta actualizada exitosamente.');
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return redirect()->route('sales.edit', $id)->withErrors($e->errors());
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('sales.edit', $id)->with('error', 'Ocurrió un error al actualizar la venta.');
         }
-
-        $sale->product_id = $product->id;
-        $sale->quantity = $validatedData['quantity'];
-        $sale->total = $product->price * $validatedData['quantity'];
-
-        $sale->save();
-
-        return redirect()->route('sales.index')->with('success', 'Venta actualizada exitosamente.');
     }
 
     // Eliminar una venta de la base de datos
     public function destroy($id)
     {
         $sale = Sale::findOrFail($id);
+        $product = $sale->product;
+        $product->stock_available += $sale->quantity;
+        $product->save();
         $sale->delete();
 
         return redirect()->route('sales.index')->with('success', 'Venta eliminada exitosamente.');
