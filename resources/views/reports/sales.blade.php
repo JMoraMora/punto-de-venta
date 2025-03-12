@@ -44,6 +44,6 @@
     </table>
 
     <a href="{{ route('reports.sales.export', ['format' => 'json', 'start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" class="btn btn-secondary">Exportar JSON</a>
-    <a href="{{ route('reports.sales.export', ['format' => 'xlsx', 'start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" class="btn btn-secondary">Exportar XLSX</a>
+    <a href="{{ route('reports.sales.export', ['format' => 'csv', 'start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" class="btn btn-secondary">Exportar XLSX</a>
 </div>
 @endsection
