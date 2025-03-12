@@ -29,7 +29,7 @@
 
 <div class="form-group">
     <label for="total">Total</label>
-    <input type="text" name="total" class="form-control" id="total" value="{{ old('total', $sale->total ?? '') }}" disabled required>
+    <input type="text" name="total" class="form-control" id="total" value="{{ old('total', $sale->total ?? '') }}" disabled>
 </div>
 
 
