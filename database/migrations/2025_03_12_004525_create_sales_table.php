@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('product_id')->constrained();
-            $table->unsignedInteger('quantity');
+            $table->string('code')->unique();
+            $table->string('customer');
+            $table->string('document');
+            $table->string('email')->unique()->nullable();
+            $table->unsignedInteger('user_id');
             $table->decimal('total', 10, 2);
 
             $table->timestamps();
