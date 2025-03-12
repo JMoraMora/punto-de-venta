@@ -72,6 +72,11 @@ class ProductController extends Controller
     public function destroy(string $id): RedirectResponse
     {
         $product = Product::findOrFail($id);
+
+        if ($product->sales()->exists()) {
+            return redirect()->route('products.index')->with('error', 'Product cannot be deleted because it has sales.');
+        }
+
         $product->delete();
 
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');

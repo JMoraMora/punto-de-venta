@@ -5,6 +5,19 @@
 
 @section('content')
 <div class="container">
+    <div class="mt-5">
+        @session('success')
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endsession
+
+        @session('error')
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endsession
+    </div>
     <h1 class="my-4">Products</h1>
     <a href="{{ route('products.create') }}" class="btn btn-success mb-3">Create Product</a>
     <table class="table table-bordered">
