@@ -11,21 +11,25 @@ use Illuminate\Validation\ValidationException;
 
 class SaleController extends Controller
 {
-    // Mostrar una lista de ventas
     public function index()
     {
-        $sales = Sale::orderBy('id', 'desc')->paginate(12);
+        $query = Sale::orderBy('id', 'desc');
+
+        if (Auth::user()->role === 'seller') {
+            $query->where('user_id', Auth::id());
+        }
+
+        $sales = $query->paginate(12);
+
         return view('sales.index', compact('sales'));
     }
 
-    // Mostrar el formulario para crear una nueva venta
     public function create()
     {
         $products = Product::all();
         return view('sales.create', compact('products'));
     }
 
-    // Almacenar una nueva venta en la base de datos
     public function store(Request $request)
     {
         DB::beginTransaction();
@@ -80,7 +84,6 @@ class SaleController extends Controller
         }
     }
 
-    // Mostrar el formulario para editar una venta existente
     public function edit($id)
     {
         $sale = Sale::findOrFail($id);
@@ -143,7 +146,6 @@ class SaleController extends Controller
         }
     }
 
-    // Eliminar una venta de la base de datos
     public function destroy($id)
     {
         $sale = Sale::findOrFail($id);
