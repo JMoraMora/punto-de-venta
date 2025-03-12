@@ -25,8 +25,10 @@
                 <th>Precio unitario</th>
                 <th>Total</th>
                 <th>Fecha</th>
-                <th>Vendedor</th>
-                <th>Acciones</th>
+                @if (Auth::user()->role === 'administrator')
+                    <th>Vendedor</th>
+                    <th>Acciones</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -40,15 +42,17 @@
                     <td>{{ $sale->product->price }}</td>
                     <td>{{ $sale->total }}</td>
                     <td>{{ $sale->created_at }}</td>
-                    <td>{{ $sale->user->name }}</td>
-                    <td>
-                        <a href="{{ route('sales.edit', $sale->id) }}" class="btn btn-warning">Editar</a>
-                        <form action="{{ route('sales.destroy', $sale->id) }}" method="POST" style="display:inline-block;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta venta?')">Eliminar</button>
-                        </form>
-                    </td>
+                    @if (Auth::user()->role === 'administrator')
+                        <td>{{ $sale->user->name }}</td>
+                        <td>
+                            <a href="{{ route('sales.edit', $sale->id) }}" class="btn btn-warning">Editar</a>
+                            <form action="{{ route('sales.destroy', $sale->id) }}" method="POST" style="display:inline-block;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta venta?')">Eliminar</button>
+                            </form>
+                        </td>
+                    @endif
                 </tr>
             @endforeach
         </tbody>

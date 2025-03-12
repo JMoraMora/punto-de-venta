@@ -21,7 +21,7 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::middleware(EnsureUserHasRole::class . ':administrator')->group(function () {
+    Route::middleware(EnsureUserHasRole::class . ':seller,administrator')->group(function () {
         Route::controller(ProductController::class)->group(function () {
             Route::get('/products', 'index')->name('products.index');
             Route::get('/products/create', 'create')->name('products.create');
@@ -34,17 +34,18 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(EnsureUserHasRole::class . ':seller,administrator')->group(function () {
+        Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
+        Route::get('/sales/create', [SaleController::class, 'create'])->name('sales.create');
+        Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
+    });
+
+    Route::middleware(EnsureUserHasRole::class . ':administrator')->group(function () {
         Route::controller(SaleController::class)->group(function () {
-            Route::get('/sales', 'index')->name('sales.index');
-            Route::get('/sales/create', 'create')->name('sales.create');
-            Route::post('/sales', 'store')->name('sales.store');
             Route::get('/sales/{sale}/edit', 'edit')->name('sales.edit');
             Route::put('/sales/{sale}', 'update')->name('sales.update');
             Route::delete('/sales/{sale}', 'destroy')->name('sales.destroy');
         });
-    });
 
-    Route::middleware(EnsureUserHasRole::class . ':administrator')->group(function () {
         Route::get('/reports/sales', [ReportController::class, 'index'])->name('reports.sales');
         Route::get('/reports/sales/export', [ReportController::class, 'export'])->name('reports.sales.export');
     });

@@ -13,7 +13,9 @@ class ReportController extends Controller
         $query = Sale::query();
 
         if ($request->has('start_date') && $request->has('end_date')) {
-            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+            $start_date = $request->start_date;
+            $end_date = $request->end_date . ' 23:59:59';
+            $query->whereBetween('created_at', [$start_date, $end_date]);
         }
 
         $sales = $query->get();
@@ -28,7 +30,9 @@ class ReportController extends Controller
         $query = Sale::query();
 
         if ($request->has('start_date') && $request->has('end_date')) {
-            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+            $start_date = $request->start_date;
+            $end_date = $request->end_date . ' 23:59:59';
+            $query->whereBetween('created_at', [$start_date, $end_date]);
         }
 
         $sales = $query->get();
