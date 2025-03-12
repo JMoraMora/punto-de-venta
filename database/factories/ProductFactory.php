@@ -20,7 +20,8 @@ class ProductFactory extends Factory
             'sku' => $this->faker->unique()->bothify('???-#####'),
             'name' => $this->faker->word(),
             'price' => $this->faker->randomFloat(2, 1, 1000),
-            'stock' => $this->faker->numberBetween(0, 100),
+            'stock' => $stock = $this->faker->numberBetween(0, 100),
+            'stock_available' => $stock,
         ];
     }
 }

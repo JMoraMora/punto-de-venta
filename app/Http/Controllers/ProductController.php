@@ -38,7 +38,14 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
         ]);
 
-        Product::create($validated);
+        $product = new Product();
+        $product->sku = $validated['sku'];
+        $product->name = $validated['name'];
+        $product->price = $validated['price'];
+        $product->stock = $validated['stock'];
+        $product->stock_available = $validated['stock'];
+
+        $product->save();
 
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
@@ -74,7 +81,14 @@ class ProductController extends Controller
         ]);
 
         $product = Product::findOrFail($id);
-        $product->update($validated);
+
+        $product->sku = $validated['sku'];
+        $product->name = $validated['name'];
+        $product->price = $validated['price'];
+        $product->stock = $validated['stock'];
+        $product->stock_available = $validated['stock'];
+
+        $product->update();
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
