@@ -36,7 +36,7 @@
                     <td>{{ $product->sku }}</td>
                     <td>{{ $product->name }}</td>
                     <td>{{ $product->price }}</td>
-                    <td>{{ $product->stock }}</td>
+                    <td>{{ $product->stock_available }}</td>
                     <td>
                         <a href="{{ route('products.edit', $product->id) }}" class="btn btn-primary btn-sm">Edit</a>
                         <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline-block;">
